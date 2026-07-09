@@ -1,13 +1,27 @@
 Package: redistrict
-Title: What the Package Does (One Line, Title Case)
+Title: Match Congressional Districts Across Redistricting Cycles
 Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Authors@R:
+    person("Charlie", "Grabois", , "chgrabois@gmail.com", role = c("aut", "cre"))
+Description: Provides Hungarian, greedy, and naive algorithms for matching
+    U.S. congressional districts across consecutive redistricting cycles
+    based on population or area overlap, plus helpers for building
+    multi-cycle district panels and validating matches against incumbent
+    behavior.
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 URL: https://github.com/cgrabois/redistrict
 BugReports: https://github.com/cgrabois/redistrict/issues
+Depends:
+    R (>= 4.1.0)
+Imports:
+    clue,
+    dplyr,
+    purrr,
+    rlang,
+    stringr,
+    tidyr,
+    utils
+LazyData: true
