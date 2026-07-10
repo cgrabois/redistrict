@@ -99,7 +99,8 @@ build_district_panel <- function(
   stopifnot(
     "start_congress and end_congress must fall within the bundled data's range of 92-119" =
       start_congress >= 92 && end_congress <= 119,
-    start_congress < last_start_congress
+    "end_congress must be greater than start_congress" =
+      start_congress <= last_start_congress
   )
 
   if(rlang::is_null(data[[variable]])) {
