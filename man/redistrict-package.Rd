@@ -6,12 +6,13 @@
 \alias{redistrict-package}
 \title{redistrict: Match Congressional Districts Across Redistricting Cycles}
 \description{
-Every other function call in this package is written as pkg::fn() rather
-than relying on NAMESPACE imports. The two exceptions are rlang's \verb{!!} and
-\verb{:=}, used for dynamic column names inside dplyr verbs — these are
-operators, not ordinary functions, so they can't be qualified at the call
-site the way pkg::fn() calls can. This file's @importFrom is the only
-NAMESPACE import the package declares.
+Provides matching algorithms for tracking U.S. congressional districts
+across redistricting cycles, based on population/area overlap.
+}
+\details{
+Start with \code{\link[=build_district_panel]{build_district_panel()}} — it builds a full multi-cycle panel
+of matched districts in a single call and is the main entry point for
+most uses of this package.
 }
 \seealso{
 Useful links:
@@ -25,4 +26,3 @@ Useful links:
 \strong{Maintainer}: Charlie Grabois \email{chgrabois@gmail.com}
 
 }
-\keyword{internal}

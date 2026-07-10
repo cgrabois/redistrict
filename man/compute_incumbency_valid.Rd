@@ -4,13 +4,13 @@
 \alias{compute_incumbency_valid}
 \title{Validate matches against actual incumbent behavior}
 \usage{
-compute_incumbency_valid(panel, incumbent_match_type = NULL)
+compute_incumbency_valid(panel, incumbent_match_type)
 }
 \arguments{
 \item{panel}{A data.frame from \code{build_district_panel(shape = "match_level")}, i.e. with columns \code{source}, \code{target}, \code{cycle} (e.g.
 \code{"cd111_cd112"}).}
 
-\item{incumbent_match_type}{\code{"i2i"} (win-only incumbent-to-incumbent
+\item{incumbent_match_type}{\code{"i2i"} (incumbent-to-incumbent
 matches) or \code{"i2c"} (incumbent-to-candidate matches).}
 }
 \value{

@@ -61,7 +61,7 @@ strictly greater than this value on both sides — pairs at or below it
 are zeroed out before matching (default \code{0}, i.e. exclude pairs with no
 allocation). \code{NA} means no threshold is imposed.}
 
-\item{incumbent_lock}{\code{"i2i"} (win-only incumbent-to-incumbent matches),
+\item{incumbent_lock}{\code{"i2i"} (incumbent-to-incumbent matches),
 \code{"i2c"} (incumbent-to-candidate matches), or \code{NULL} to skip (default \code{NULL}).
 When set, incumbent pairs are locked in before matching runs, for every
 congress pair — their rows and columns are removed from the overlap

@@ -9,7 +9,7 @@
 #' @param panel A data.frame from `build_district_panel(shape =
 #'   "match_level")`, i.e. with columns `source`, `target`, `cycle` (e.g.
 #'   `"cd111_cd112"`).
-#' @param incumbent_match_type `"i2i"` (win-only incumbent-to-incumbent
+#' @param incumbent_match_type `"i2i"` (incumbent-to-incumbent
 #'   matches) or `"i2c"` (incumbent-to-candidate matches).
 #'
 #' @return `panel` with two added columns, each `"agree"`, `"disagree"`, or
@@ -24,7 +24,7 @@
 #'   }
 #'
 #' @export
-compute_incumbency_valid <- function(panel, incumbent_match_type = NULL) {
+compute_incumbency_valid <- function(panel, incumbent_match_type) {
 
   if (!all(c("source", "target", "cycle") %in% names(panel))) {
     stop("panel must come from build_district_panel(shape = 'match_level')")

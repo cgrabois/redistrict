@@ -51,7 +51,7 @@ baseline for comparison.}
 \item{data}{Nested list (\verb{variable > cycle > state > matrix}); defaults to
 the package-bundled \link{overlap}.}
 
-\item{incumbent_lock}{\code{"i2i"} (win-only incumbent-to-incumbent matches),
+\item{incumbent_lock}{\code{"i2i"} (incumbent-to-incumbent matches),
 \code{"i2c"} (incumbent-to-candidate matches), or \code{NULL} to skip (default \code{NULL}).
 When set, incumbent pairs are locked in before the matching algorithm
 runs — their rows and columns are removed from the overlap matrix so the

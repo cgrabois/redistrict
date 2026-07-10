@@ -34,7 +34,7 @@
 #'   }
 #' @param data Nested list (`variable > cycle > state > matrix`); defaults to
 #'   the package-bundled [overlap].
-#' @param incumbent_lock `"i2i"` (win-only incumbent-to-incumbent matches),
+#' @param incumbent_lock `"i2i"` (incumbent-to-incumbent matches),
 #'   `"i2c"` (incumbent-to-candidate matches), or `NULL` to skip (default `NULL`).
 #'   When set, incumbent pairs are locked in before the matching algorithm
 #'   runs — their rows and columns are removed from the overlap matrix so the

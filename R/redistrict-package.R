@@ -1,12 +1,11 @@
 #' redistrict: Match Congressional Districts Across Redistricting Cycles
 #'
-#' Every other function call in this package is written as pkg::fn() rather
-#' than relying on NAMESPACE imports. The two exceptions are rlang's `!!` and
-#' `:=`, used for dynamic column names inside dplyr verbs — these are
-#' operators, not ordinary functions, so they can't be qualified at the call
-#' site the way pkg::fn() calls can. This file's @importFrom is the only
-#' NAMESPACE import the package declares.
+#' Provides matching algorithms for tracking U.S. congressional districts
+#' across redistricting cycles, based on population/area overlap.
 #'
-#' @keywords internal
+#' Start with [build_district_panel()] — it builds a full multi-cycle panel
+#' of matched districts in a single call and is the main entry point for
+#' most uses of this package.
+#'
 #' @importFrom rlang !! :=
 "_PACKAGE"
