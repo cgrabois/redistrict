@@ -11,7 +11,6 @@ Description: Provides Hungarian, greedy, and naive algorithms for matching
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 URL: https://github.com/cgrabois/redistrict
 BugReports: https://github.com/cgrabois/redistrict/issues
 Depends:
@@ -25,3 +24,4 @@ Imports:
     tidyr,
     utils
 LazyData: true
+Config/roxygen2/version: 8.0.0
