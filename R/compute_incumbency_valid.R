@@ -43,7 +43,7 @@ compute_incumbency_valid <- function(panel, incumbent_match_type) {
   # validate against without an incumbent dataset
   stopifnot(
     "incumbent_match_type must be 'i2i' or 'i2c'" =
-      incumbent_match_type %in% c("i2i", "i2c")
+      isTRUE(incumbent_match_type %in% c("i2i", "i2c"))
   )
 
   # look up the incumbent-match dataset (incumbency_matches_i2i or _i2c)
