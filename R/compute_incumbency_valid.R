@@ -9,7 +9,7 @@
 #' @param panel A data.frame from `build_district_panel(shape =
 #'   "match_level")`, i.e. with columns `source`, `target`, `cycle` (e.g.
 #'   `"cd111_cd112"`).
-#' @param incumbent_match_type `"i2i"` (incumbent-to-incumbent
+#' @param incumbent_match_type Required — `"i2i"` (incumbent-to-incumbent
 #'   matches) or `"i2c"` (incumbent-to-candidate matches).
 #'
 #' @return `panel` with two added columns, each `"agree"`, `"disagree"`, or
@@ -26,24 +26,33 @@
 #' @export
 compute_incumbency_valid <- function(panel, incumbent_match_type) {
 
+  # panel must be a match_level panel, i.e. have these three columns
   if (!all(c("source", "target", "cycle") %in% names(panel))) {
     stop("panel must come from build_district_panel(shape = 'match_level')")
   }
 
+  # incumbent_match_type must be one of the two valid types — unlike
+  # incumbent_lock elsewhere, NULL isn't valid here since there's nothing to
+  # validate against without an incumbent dataset
+  stopifnot(
+    "incumbent_match_type must be 'i2i' or 'i2c'" =
+      incumbent_match_type %in% c("i2i", "i2c")
+  )
+
+  # look up the incumbent-match dataset (incumbency_matches_i2i or _i2c)
   incumbent_match_data <- resolve_incumbent_match_data(incumbent_match_type)
 
-  if (!is.data.frame(incumbent_match_data)) {
-    stop("incumbent_match_type must be 'i2i' or 'i2c'")
-  }
-
   panel |>
+    # bring in the real incumbent (if any) for this row's source district
     dplyr::left_join(incumbent_match_data,
               by = c("source" = "incumbent_from", "cycle"),
               na_matches = "never") |>
+    # ...and for this row's target district
     dplyr::left_join(incumbent_match_data,
               by = c("target" = "incumbent_to", "cycle"),
               na_matches = "never") |>
     dplyr::mutate(
+      # did the algorithm send this row's source to where its real incumbent (if any) went?
       source_incumbent_valid = dplyr::case_when(
         is.na(source)              ~ NA_character_,
         is.na(incumbent_to)        ~ "no incumbent",
@@ -51,6 +60,7 @@ compute_incumbency_valid <- function(panel, incumbent_match_type) {
         incumbent_to == target     ~ "agree",
         TRUE                       ~ "disagree"
       ),
+      # did the algorithm bring this row's target from where its real incumbent (if any) came from?
       target_incumbent_valid = dplyr::case_when(
         is.na(target)              ~ NA_character_,
         is.na(incumbent_from)      ~ "no incumbent",

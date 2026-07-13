@@ -53,13 +53,17 @@ baseline for comparison.}
 }}
 
 \item{data}{Nested list (\verb{variable > cycle > state > matrix}); defaults to
-the package-bundled \link{overlap}.}
+the package-bundled \link{overlap}. Supplying a custom \code{data} is not
+recommended — the package's safeguards assume the bundled data's
+structure and value ranges.}
 
 \item{threshold}{Numeric; a pair is kept only if the allocation factor
 (from \code{\link[=threshold_vars_for]{threshold_vars_for()}}, or \code{threshold_vars} if supplied) is
 strictly greater than this value on both sides — pairs at or below it
 are zeroed out before matching (default \code{0}, i.e. exclude pairs with no
-allocation). \code{NA} means no threshold is imposed.}
+allocation). \code{NA} means no threshold is imposed. Must be non-negative
+(or \code{NA}) when using the bundled \link{overlap} data, since its allocation
+factors are never negative.}
 
 \item{incumbent_lock}{\code{"i2i"} (incumbent-to-incumbent matches),
 \code{"i2c"} (incumbent-to-candidate matches), or \code{NULL} to skip (default \code{NULL}).
@@ -74,21 +78,24 @@ allocation factor (from \code{\link[=threshold_vars_for]{threshold_vars_for()}},
 supplied) is strictly greater than this value — pairs at or below it are
 left for the algorithm instead. Only applies when \code{incumbent_lock} is
 \code{"i2i"} or \code{"i2c"} (default \code{0}, i.e. lock pairs with strictly positive
-afact). \code{NA} means no threshold — all incumbent pairs are locked.}
+afact). \code{NA} means no threshold — all incumbent pairs are locked. Must
+be non-negative (or \code{NA}) when using the bundled \link{overlap} data.}
 
 \item{threshold_vars}{Character vector of variable names to use for
-thresholding (both \code{lock_threshold} and \code{threshold}). Defaults to
-\code{NULL}, which means: for \code{"pop"} or \code{"area"}, both directional
-allocation factors (\code{afact_s2t} and \code{afact_t2s}, or their \verb{_area}
-equivalents) must exceed the threshold; for any \verb{afact_*} variable,
-only that variable itself is checked. See \code{\link[=threshold_vars_for]{threshold_vars_for()}} for
-the exact mapping.}
+thresholding (both \code{lock_threshold} and \code{threshold}); each must be a
+variable present in \code{data}. Defaults to \code{NULL}, which means: for \code{"pop"}
+or \code{"area"}, both directional allocation factors (\code{afact_s2t} and
+\code{afact_t2s}, or their \verb{_area} equivalents) must exceed the threshold;
+for any \verb{afact_*} variable, only that variable itself is checked. See
+\code{\link[=threshold_vars_for]{threshold_vars_for()}} for the exact mapping.}
 
-\item{start_congress}{Integer; first congress in the panel. Must be \verb{>= 92}, the earliest congress covered by the bundled \link{overlap} data
-(default \code{92}).}
+\item{start_congress}{Integer; first congress in the panel. Must be
+\verb{>= 92}, the earliest congress covered by the bundled \link{overlap} data,
+when using that data (default \code{92}).}
 
-\item{end_congress}{Integer; last congress in the panel. Must be \verb{<= 119}, the latest congress covered by the bundled \link{overlap} data (default
-\code{119}).}
+\item{end_congress}{Integer; last congress in the panel, greater than
+\code{start_congress}. Must be \verb{<= 119}, the latest congress covered by the
+bundled \link{overlap} data, when using that data (default \code{119}).}
 
 \item{shape}{One of \code{"long"} (default), \code{"wide"}, \code{"match_level"} — see
 Value below.}

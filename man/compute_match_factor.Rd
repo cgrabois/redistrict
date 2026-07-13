@@ -11,11 +11,16 @@ compute_match_factor(panel, vars, data = overlap)
 \code{"cd111_cd112"}), \code{state_abb}.}
 
 \item{vars}{Character vector of variable names to compute, e.g.
-\code{c("pop", "area")}. Each is added as a column named after the variable
-itself.}
+\code{c("pop", "area")} — pass more than one to add multiple columns at once.
+Each must be a variable present in \code{data}; when using the bundled
+\link{overlap} data, that means one or more of \code{"pop"}, \code{"area"},
+\code{"afact_s2t"}, \code{"afact_t2s"}, \code{"afact_s2t_area"}, \code{"afact_t2s_area"}.
+Each is added as a column named after the variable itself.}
 
 \item{data}{Nested list (\verb{variable > cycle > state > matrix}); defaults to
-the package-bundled \link{overlap}.}
+the package-bundled \link{overlap}. Supplying a custom \code{data} is not
+recommended — the package's safeguards assume the bundled data's
+structure and value ranges.}
 }
 \value{
 \code{panel} with one added numeric column per entry in \code{vars}, \code{NA}

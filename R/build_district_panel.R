@@ -38,12 +38,16 @@
 #'       baseline for comparison.}
 #'   }
 #' @param data Nested list (`variable > cycle > state > matrix`); defaults to
-#'   the package-bundled [overlap].
+#'   the package-bundled [overlap]. Supplying a custom `data` is not
+#'   recommended — the package's safeguards assume the bundled data's
+#'   structure and value ranges.
 #' @param threshold Numeric; a pair is kept only if the allocation factor
 #'   (from [threshold_vars_for()], or `threshold_vars` if supplied) is
 #'   strictly greater than this value on both sides — pairs at or below it
 #'   are zeroed out before matching (default `0`, i.e. exclude pairs with no
-#'   allocation). `NA` means no threshold is imposed.
+#'   allocation). `NA` means no threshold is imposed. Must be non-negative
+#'   (or `NA`) when using the bundled [overlap] data, since its allocation
+#'   factors are never negative.
 #' @param incumbent_lock `"i2i"` (incumbent-to-incumbent matches),
 #'   `"i2c"` (incumbent-to-candidate matches), or `NULL` to skip (default `NULL`).
 #'   When set, incumbent pairs are locked in before matching runs, for every
@@ -56,20 +60,21 @@
 #'   supplied) is strictly greater than this value — pairs at or below it are
 #'   left for the algorithm instead. Only applies when `incumbent_lock` is
 #'   `"i2i"` or `"i2c"` (default `0`, i.e. lock pairs with strictly positive
-#'   afact). `NA` means no threshold — all incumbent pairs are locked.
+#'   afact). `NA` means no threshold — all incumbent pairs are locked. Must
+#'   be non-negative (or `NA`) when using the bundled [overlap] data.
 #' @param threshold_vars Character vector of variable names to use for
-#'   thresholding (both `lock_threshold` and `threshold`). Defaults to
-#'   `NULL`, which means: for `"pop"` or `"area"`, both directional
-#'   allocation factors (`afact_s2t` and `afact_t2s`, or their `_area`
-#'   equivalents) must exceed the threshold; for any `afact_*` variable,
-#'   only that variable itself is checked. See [threshold_vars_for()] for
-#'   the exact mapping.
-#' @param start_congress Integer; first congress in the panel. Must be `>=
-#'   92`, the earliest congress covered by the bundled [overlap] data
-#'   (default `92`).
-#' @param end_congress Integer; last congress in the panel. Must be `<=
-#'   119`, the latest congress covered by the bundled [overlap] data (default
-#'   `119`).
+#'   thresholding (both `lock_threshold` and `threshold`); each must be a
+#'   variable present in `data`. Defaults to `NULL`, which means: for `"pop"`
+#'   or `"area"`, both directional allocation factors (`afact_s2t` and
+#'   `afact_t2s`, or their `_area` equivalents) must exceed the threshold;
+#'   for any `afact_*` variable, only that variable itself is checked. See
+#'   [threshold_vars_for()] for the exact mapping.
+#' @param start_congress Integer; first congress in the panel. Must be
+#'   `>= 92`, the earliest congress covered by the bundled [overlap] data,
+#'   when using that data (default `92`).
+#' @param end_congress Integer; last congress in the panel, greater than
+#'   `start_congress`. Must be `<= 119`, the latest congress covered by the
+#'   bundled [overlap] data, when using that data (default `119`).
 #' @param shape One of `"long"` (default), `"wide"`, `"match_level"` — see
 #'   Value below.
 #'
@@ -94,26 +99,68 @@ build_district_panel <- function(
     threshold_vars = NULL, start_congress = 92, end_congress = 119, shape = "long"
 ) {
 
+  # start_congress/end_congress must be numeric before any arithmetic on them
+  stopifnot(
+    "start_congress and end_congress must be numeric" =
+      is.numeric(start_congress) && is.numeric(end_congress)
+  )
+
+  # variable/method/shape must be one of their allowed strings
+  variable <- match.arg(variable, c("pop", "area", "afact_s2t", "afact_t2s", "afact_s2t_area", "afact_t2s_area"))
+  method   <- match.arg(method, c("hungarian", "greedy", "naive"))
+  shape    <- match.arg(shape, c("long", "wide", "match_level"))
+
+  # incumbent_lock must be 'i2i'/'i2c'/NULL — checked manually (not match.arg)
+  # since match.arg silently treats NULL as "missing" and would coerce it to
+  # the first choice instead of preserving it
+  stopifnot(
+    "incumbent_lock must be 'i2i', 'i2c', or NULL" =
+      rlang::is_null(incumbent_lock) || incumbent_lock %in% c("i2i", "i2c")
+  )
+
   last_start_congress <- end_congress - 1
 
+  # end_congress must come after start_congress
   stopifnot(
-    "start_congress and end_congress must fall within the bundled data's range of 92-119" =
-      start_congress >= 92 && end_congress <= 119,
     "end_congress must be greater than start_congress" =
       start_congress <= last_start_congress
   )
 
+  # bundled data has known bounds/ranges — these checks don't apply to custom data
+  if (missing(data)) {
+    stopifnot(
+      "start_congress and end_congress must fall within the bundled data's range of 92-119" =
+        start_congress >= 92 && end_congress <= 119,
+      "threshold must be >= 0 (or NA) when using the bundled data" =
+        is.na(threshold) || threshold >= 0,
+      "lock_threshold must be >= 0 (or NA) when using the bundled data" =
+        is.na(lock_threshold) || lock_threshold >= 0
+    )
+  }
+
+  # variable must actually exist in data (relevant for custom data)
   if(rlang::is_null(data[[variable]])) {
     stop(paste0(
       "No data found for variable='", variable
     ))
   }
 
+  # every entry in threshold_vars must also exist in data
+  if (!rlang::is_null(threshold_vars)) {
+    missing_vars <- threshold_vars[!threshold_vars %in% names(data)]
+    if (length(missing_vars) > 0) {
+      stop(paste0(
+        "No data found for threshold_vars: ", paste(missing_vars, collapse = ", ")
+      ))
+    }
+  }
+
+  # build the list of consecutive congress-pair cycle names to iterate over
   cycles <- purrr::map_chr(start_congress:last_start_congress, function(num) {
     paste0("cd", num, "_cd", num + 1)
   })
 
-  # Run match_crosswalk for each cycle and rename columns to congress-specific names
+  # run match_crosswalk for each cycle and rename columns to congress-specific names
   cycle_crosswalks <- purrr::map(purrr::set_names(cycles), function(cycle) {
     parts <- strsplit(cycle, "_")[[1]]
     src   <- as.integer(gsub("cd", "", parts[1]))
@@ -132,6 +179,7 @@ build_district_panel <- function(
     cw
   })
 
+  # stitch every cycle's crosswalk together by full-joining on their shared congress column
   result <- purrr::reduce2(
     utils::tail(cycle_crosswalks, -1),
     utils::tail(names(cycle_crosswalks), -1),
@@ -142,16 +190,18 @@ build_district_panel <- function(
     .init = cycle_crosswalks[[1]]
   )
 
+  # order columns/rows consistently regardless of shape
   result <- result |>
     dplyr::select(sort(names(result))) |>
     dplyr::arrange(state_abb)
 
   if (shape == "wide") {
+    # wide: one row per lineage, one column per congress
     result |>
       dplyr::mutate(lineage_id = dplyr::row_number()) |>
       dplyr::relocate(lineage_id, state_abb)
   } else if (shape == "long") {
-
+    # long: one row per district-congress
     result |>
       dplyr::mutate(lineage_id = dplyr::row_number()) |>
       dplyr::rename_with(~ stringr::str_replace(.x, "^cd(\\d+)$", "district__\\1")) |>
@@ -164,8 +214,8 @@ build_district_panel <- function(
       dplyr::filter(!is.na(district)) |>
       dplyr::relocate(lineage_id, state_abb, congress, district)
 
-  } else if (shape == "match_level") {
-
+  } else {
+    # match_level: one row per matched pair, tagged with its cycle
     purrr::map_dfr(names(cycle_crosswalks), function(cycle) {
       parts <- strsplit(cycle, "_")[[1]]
       src   <- as.integer(gsub("cd", "", parts[1]))
@@ -183,7 +233,5 @@ build_district_panel <- function(
       dplyr::select(source, target, cycle, state_abb) |>
       dplyr::arrange(cycle, source, target)
 
-  } else {
-    stop("shape must be 'wide', 'long', or 'match_level'")
   }
 }

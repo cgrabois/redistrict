@@ -1,7 +1,10 @@
 #' Run a district-matching method across all states for one congress pair
 #'
 #' Runs a district-matching method across all states for a given congress
-#' pair and returns the combined results as a single data.frame.
+#' pair and returns the combined results as a single data.frame. Most users
+#' should start with [build_district_panel()] instead — it calls this
+#' function internally across a whole range of congresses and stitches the
+#' results into one panel.
 #'
 #' @param source_congress Integer, e.g. 112. Matched against the next
 #'   congress, `source_congress + 1`.
@@ -33,7 +36,9 @@
 #'       baseline for comparison.}
 #'   }
 #' @param data Nested list (`variable > cycle > state > matrix`); defaults to
-#'   the package-bundled [overlap].
+#'   the package-bundled [overlap]. Supplying a custom `data` is not
+#'   recommended — the package's safeguards assume the bundled data's
+#'   structure and value ranges.
 #' @param incumbent_lock `"i2i"` (incumbent-to-incumbent matches),
 #'   `"i2c"` (incumbent-to-candidate matches), or `NULL` to skip (default `NULL`).
 #'   When set, incumbent pairs are locked in before the matching algorithm
@@ -46,19 +51,21 @@
 #'   supplied) is strictly greater than this value — pairs at or below it are
 #'   left for the algorithm instead. Only applies when `incumbent_lock` is
 #'   `"i2i"` or `"i2c"` (default `0`, i.e. lock pairs with strictly positive
-#'   afact). `NA` means no threshold — all incumbent pairs are locked.
+#'   afact). `NA` means no threshold — all incumbent pairs are locked. Must
+#'   be non-negative (or `NA`) when using the bundled [overlap] data.
 #' @param threshold Numeric; a pair is kept only if the allocation factor
 #'   (from [threshold_vars_for()], or `threshold_vars` if supplied) is
 #'   strictly greater than this value on both sides — pairs at or below it
 #'   are zeroed out before matching (default `0`, i.e. exclude pairs with no
-#'   allocation). `NA` means no threshold is imposed.
+#'   allocation). `NA` means no threshold is imposed. Must be non-negative
+#'   (or `NA`) when using the bundled [overlap] data.
 #' @param threshold_vars Character vector of variable names to use for
-#'   thresholding (both `lock_threshold` and `threshold`). Defaults to
-#'   `NULL`, which means: for `"pop"` or `"area"`, both directional
-#'   allocation factors (`afact_s2t` and `afact_t2s`, or their `_area`
-#'   equivalents) must exceed the threshold; for any `afact_*` variable,
-#'   only that variable itself is checked. See [threshold_vars_for()] for
-#'   the exact mapping.
+#'   thresholding (both `lock_threshold` and `threshold`); each must be a
+#'   variable present in `data`. Defaults to `NULL`, which means: for `"pop"`
+#'   or `"area"`, both directional allocation factors (`afact_s2t` and
+#'   `afact_t2s`, or their `_area` equivalents) must exceed the threshold;
+#'   for any `afact_*` variable, only that variable itself is checked. See
+#'   [threshold_vars_for()] for the exact mapping.
 #'
 #' @return A data.frame with columns `source`, `target`, `state_abb`. Call
 #'   [compute_match_factor()] on a match_level panel if you need the matched
@@ -71,23 +78,59 @@ match_crosswalk <- function(
     threshold_vars = NULL
 ) {
 
+  # source_congress must be numeric before any arithmetic on it
+  stopifnot(
+    "source_congress must be numeric" =
+      is.numeric(source_congress)
+  )
+
+  # variable/method must be one of their allowed strings
+  variable <- match.arg(variable, c("pop", "area", "afact_s2t", "afact_t2s", "afact_s2t_area", "afact_t2s_area"))
+  method   <- match.arg(method, c("hungarian", "greedy", "naive"))
+
+  # incumbent_lock must be 'i2i'/'i2c'/NULL — resolve_incumbent_match_data()
+  # errors on anything else, so this also validates incumbent_lock
   incumbent_match_data <- resolve_incumbent_match_data(incumbent_lock)
 
   if(!is.na(lock_threshold) && lock_threshold != 0 && rlang::is_null(incumbent_lock)) {
     stop("lock_threshold has no effect unless incumbent_lock is 'i2i' or 'i2c'")
   }
 
-  method <- match.arg(method, c("hungarian", "greedy", "naive"))
+  # bundled data's allocation factors are never negative
+  if (missing(data)) {
+    stopifnot(
+      "threshold must be >= 0 (or NA) when using the bundled data" =
+        is.na(threshold) || threshold >= 0,
+      "lock_threshold must be >= 0 (or NA) when using the bundled data" =
+        is.na(lock_threshold) || lock_threshold >= 0
+    )
+  }
+
+  # e.g. "cd112_cd113"
   cycle  <- paste0("cd", source_congress, "_cd", source_congress + 1)
 
+  # variable/cycle must actually exist in data (relevant for custom data)
   if(rlang::is_null(data[[variable]][[cycle]])) {
     stop(paste0(
       "No data found for variable='", variable,
       "', cycle='", cycle
     ))
   }
+
+  # every entry in threshold_vars must also exist in data
+  if (!rlang::is_null(threshold_vars)) {
+    missing_vars <- threshold_vars[!threshold_vars %in% names(data)]
+    if (length(missing_vars) > 0) {
+      stop(paste0(
+        "No data found for threshold_vars: ", paste(missing_vars, collapse = ", ")
+      ))
+    }
+  }
+
+  # every state present for this variable/cycle
   states <- names(data[[variable]][[cycle]])
 
+  # placeholder — filled with locked incumbent pairs below if incumbent_lock is set
   matches <- data.frame()
 
   if(!rlang::is_null(incumbent_lock)) {
@@ -102,6 +145,7 @@ match_crosswalk <- function(
         state_abb = substr(incumbent_from, 1, 2)
       )
 
+    # drop locked pairs at or below lock_threshold, leaving them for the algorithm instead
     if (!is.na(lock_threshold)) {
       lock_tvars <- if (rlang::is_null(threshold_vars)) threshold_vars_for(variable) else threshold_vars
       for (tv in lock_tvars) {
@@ -117,10 +161,13 @@ match_crosswalk <- function(
       }
     }
 
+    # removes locked districts' rows/cols from a state's matrix so the
+    # matching algorithm can't reassign them
     pop_matrix <- function(matrix, row_names, col_names) {
       matrix[!rownames(matrix) %in% row_names, !colnames(matrix) %in% col_names, drop = FALSE]
     }
 
+    # apply that removal to every state's matrix before matching runs
     for(state in states) {
 
       inc_matches_state <- matches |>
@@ -138,12 +185,16 @@ match_crosswalk <- function(
     }
   }
 
-  match_fn <- switch(method,
-                     hungarian = function(st) hungarian_match(source_congress, variable, st, data, threshold, threshold_vars),
-                     greedy    = function(st) greedy_match(source_congress, variable, st, data, threshold, threshold_vars),
-                     naive     = function(st) naive_match(source_congress, variable, st, data)
+  # pick the per-state matching function for the chosen method
+  match_fn <- switch(
+    method,
+    hungarian = function(st) hungarian_match(source_congress, variable, st, data, threshold, threshold_vars),
+    greedy    = function(st) greedy_match(source_congress, variable, st, data, threshold, threshold_vars),
+    naive     = function(st) naive_match(source_congress, variable, st, data)
   )
 
+  # run matching for every remaining state, tag each row with its state, then
+  # combine with any locked incumbent matches from above
   matches <- purrr::map_dfr(states, match_fn) |>
     dplyr::mutate(
       state_abb = dplyr::case_when(

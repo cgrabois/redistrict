@@ -36,21 +36,25 @@ falls in the source district.}
 \item{state}{Postal abbreviation string, e.g. \code{"AL"}.}
 
 \item{data}{Nested list (\verb{variable > cycle > state > matrix}); defaults to
-the package-bundled \link{overlap}.}
+the package-bundled \link{overlap}. Supplying a custom \code{data} is not
+recommended — the package's safeguards assume the bundled data's
+structure and value ranges.}
 
 \item{threshold}{Numeric; a pair is kept only if either allocation factor
 (from \code{\link[=threshold_vars_for]{threshold_vars_for()}}, or \code{threshold_vars} if supplied) is
 strictly greater than this value — pairs at or below it are zeroed out
 before solving and un-matched if assigned (both districts returned with
 \code{NA}). Default \code{0} excludes pairs where either afact is zero. \code{NA}
-imposes no threshold.}
+imposes no threshold. Must be non-negative (or \code{NA}) when using the
+bundled \link{overlap} data.}
 
 \item{threshold_vars}{Character vector of variable names to use for
-thresholding. Defaults to \code{NULL}, which means: for \code{"pop"} or \code{"area"},
-both directional allocation factors (\code{afact_s2t} and \code{afact_t2s}, or
-their \verb{_area} equivalents) must exceed the threshold; for any \verb{afact_*}
-variable, only that variable itself is checked. See
-\code{\link[=threshold_vars_for]{threshold_vars_for()}} for the exact mapping.}
+thresholding; each must be a variable present in \code{data}. Defaults to
+\code{NULL}, which means: for \code{"pop"} or \code{"area"}, both directional
+allocation factors (\code{afact_s2t} and \code{afact_t2s}, or their \verb{_area}
+equivalents) must exceed the threshold; for any \verb{afact_*} variable,
+only that variable itself is checked. See \code{\link[=threshold_vars_for]{threshold_vars_for()}} for
+the exact mapping.}
 }
 \value{
 A data.frame with columns \code{source}, \code{target}.
@@ -60,5 +64,7 @@ matched pairs' overlap values.
 \description{
 Matches congressional districts across redistricting cycles by maximizing
 total overlap (of whichever variable is specified) using the Hungarian
-algorithm (\code{\link[clue:solve_LSAP]{clue::solve_LSAP()}}).
+algorithm (\code{\link[clue:solve_LSAP]{clue::solve_LSAP()}}). Most users should start with
+\code{\link[=build_district_panel]{build_district_panel()}} instead — it calls this function internally for
+every state and congress pair in a range.
 }

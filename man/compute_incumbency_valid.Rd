@@ -10,7 +10,7 @@ compute_incumbency_valid(panel, incumbent_match_type)
 \item{panel}{A data.frame from \code{build_district_panel(shape = "match_level")}, i.e. with columns \code{source}, \code{target}, \code{cycle} (e.g.
 \code{"cd111_cd112"}).}
 
-\item{incumbent_match_type}{\code{"i2i"} (incumbent-to-incumbent
+\item{incumbent_match_type}{Required — \code{"i2i"} (incumbent-to-incumbent
 matches) or \code{"i2c"} (incumbent-to-candidate matches).}
 }
 \value{

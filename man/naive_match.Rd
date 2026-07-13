@@ -20,7 +20,9 @@ overlap value for these pairs.}
 \item{state}{Postal abbreviation string, e.g. \code{"AL"}.}
 
 \item{data}{Nested list (\verb{variable > cycle > state > matrix}); defaults to
-the package-bundled \link{overlap}.}
+the package-bundled \link{overlap}. Supplying a custom \code{data} is not
+recommended — the package's safeguards assume the bundled data's
+structure and value ranges.}
 }
 \value{
 A data.frame with columns \code{source}, \code{target}.
@@ -31,5 +33,7 @@ matched pairs' overlap values.
 Matches congressional districts across redistricting cycles by district
 number alone (e.g. source district 3 -> target district 3), ignoring
 overlap entirely. Useful as a baseline for comparison. Districts with no
-same-numbered counterpart appear with \code{NA} in the unmatched column.
+same-numbered counterpart appear with \code{NA} in the unmatched column. Most
+users should start with \code{\link[=build_district_panel]{build_district_panel()}} instead — it calls this
+function internally for every state and congress pair in a range.
 }
