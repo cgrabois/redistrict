@@ -120,3 +120,26 @@ congress pair in the given range, so individual districts can be tracked
 across cycles. Consecutive pairs are joined on their shared congress
 column (e.g. cd108 links the 107-108 and 108-109 crosswalks).
 }
+\examples{
+# default "long" shape, a small range for speed
+panel_long <- build_district_panel(start_congress = 111, end_congress = 114)
+panel_long
+
+# same range, "wide" shape for comparison
+panel_wide <- build_district_panel(
+  start_congress = 111, end_congress = 114, shape = "wide"
+)
+panel_wide
+
+# build a match_level panel, then validate it against incumbent data
+match_level_panel <- build_district_panel(
+  start_congress = 111, end_congress = 114, shape = "match_level"
+)
+validated_panel <- compute_incumbency_valid(match_level_panel, "i2i")
+validated_panel
+
+# or add overlap values for the matched pairs instead
+panel_with_overlap <- compute_match_factor(match_level_panel, vars = c("pop", "area"))
+panel_with_overlap
+
+}

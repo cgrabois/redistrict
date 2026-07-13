@@ -71,6 +71,15 @@
 #'   [compute_match_factor()] on a match_level panel if you need the matched
 #'   pairs' overlap values.
 #'
+#' @examples
+#' # match every state for one congress pair
+#' crosswalk <- match_crosswalk(111)
+#' crosswalk
+#'
+#' # lock incumbent-to-candidate matches first, then match the rest
+#' crosswalk_locked <- match_crosswalk(111, incumbent_lock = "i2c")
+#' crosswalk_locked
+#'
 #' @export
 match_crosswalk <- function(
     source_congress, variable = "pop", method = "hungarian", data = overlap,

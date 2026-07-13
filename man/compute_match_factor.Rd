@@ -33,3 +33,11 @@ overlap/allocation value for that variable, looked up from \code{data}. Call
 this yourself on a panel you've already built — it is not run
 automatically by \code{\link[=build_district_panel]{build_district_panel()}}.
 }
+\examples{
+match_level_panel <- build_district_panel(
+  start_congress = 111, end_congress = 114, shape = "match_level"
+)
+panel_with_overlap <- compute_match_factor(match_level_panel, vars = c("pop", "area"))
+panel_with_overlap
+
+}

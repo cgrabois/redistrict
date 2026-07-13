@@ -25,3 +25,11 @@ of the afact pair must exceed the threshold. For afact variables, only the
 variable itself is checked, since the user already chose a single
 direction.
 }
+\examples{
+pop_vars <- threshold_vars_for("pop")
+pop_vars
+
+afact_vars <- threshold_vars_for("afact_s2t")
+afact_vars
+
+}

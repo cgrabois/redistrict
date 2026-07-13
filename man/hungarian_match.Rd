@@ -68,3 +68,14 @@ algorithm (\code{\link[clue:solve_LSAP]{clue::solve_LSAP()}}). Most users should
 \code{\link[=build_district_panel]{build_district_panel()}} instead — it calls this function internally for
 every state and congress pair in a range.
 }
+\examples{
+# cd112_cd113 spans the post-2010-census redistricting cycle
+hungarian_result <- hungarian_match(112, "pop", "CA")
+hungarian_result
+
+# compare against greedy_match() on the same inputs — greedy isn't
+# guaranteed to find the same (optimal) assignment
+greedy_result <- greedy_match(112, "pop", "CA")
+greedy_result
+
+}

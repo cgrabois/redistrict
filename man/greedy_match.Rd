@@ -68,3 +68,14 @@ remaining value exceeds the threshold. Most users should start with
 \code{\link[=build_district_panel]{build_district_panel()}} instead — it calls this function internally for
 every state and congress pair in a range.
 }
+\examples{
+# cd112_cd113 spans the post-2010-census redistricting cycle
+greedy_result <- greedy_match(112, "pop", "CA")
+greedy_result
+
+# compare against hungarian_match(), which maximizes total overlap
+# instead of just claiming the best value greedily
+hungarian_result <- hungarian_match(112, "pop", "CA")
+hungarian_result
+
+}

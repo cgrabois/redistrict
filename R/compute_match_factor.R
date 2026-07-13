@@ -23,6 +23,13 @@
 #' @return `panel` with one added numeric column per entry in `vars`, `NA`
 #'   for rows with no source or no target (unmatched districts).
 #'
+#' @examples
+#' match_level_panel <- build_district_panel(
+#'   start_congress = 111, end_congress = 114, shape = "match_level"
+#' )
+#' panel_with_overlap <- compute_match_factor(match_level_panel, vars = c("pop", "area"))
+#' panel_with_overlap
+#'
 #' @export
 compute_match_factor <- function(panel, vars, data = overlap) {
 

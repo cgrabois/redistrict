@@ -92,6 +92,28 @@
 #' `state_abb`. Match values are not included — call [compute_match_factor()]
 #' to add them for any variable(s) you want.
 #'
+#' @examples
+#' # default "long" shape, a small range for speed
+#' panel_long <- build_district_panel(start_congress = 111, end_congress = 114)
+#' panel_long
+#'
+#' # same range, "wide" shape for comparison
+#' panel_wide <- build_district_panel(
+#'   start_congress = 111, end_congress = 114, shape = "wide"
+#' )
+#' panel_wide
+#'
+#' # build a match_level panel, then validate it against incumbent data
+#' match_level_panel <- build_district_panel(
+#'   start_congress = 111, end_congress = 114, shape = "match_level"
+#' )
+#' validated_panel <- compute_incumbency_valid(match_level_panel, "i2i")
+#' validated_panel
+#'
+#' # or add overlap values for the matched pairs instead
+#' panel_with_overlap <- compute_match_factor(match_level_panel, vars = c("pop", "area"))
+#' panel_with_overlap
+#'
 #' @export
 build_district_panel <- function(
     variable = "pop", method = "hungarian", data = overlap, threshold = 0,

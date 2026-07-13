@@ -25,6 +25,16 @@
 #'   Call [compute_match_factor()] on a match_level panel if you need the
 #'   matched pairs' overlap values.
 #'
+#' @examples
+#' matches <- naive_match(111, "pop", "CA")
+#' matches
+#'
+#' # add an overlap value for these district-number-based pairs
+#' matches$cycle     <- "cd111_cd112"
+#' matches$state_abb <- "CA"
+#' matches_with_pop <- compute_match_factor(matches, vars = "pop")
+#' matches_with_pop
+#'
 #' @export
 naive_match <- function(source_congress, variable, state, data = overlap) {
 

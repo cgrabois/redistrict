@@ -37,3 +37,14 @@ same-numbered counterpart appear with \code{NA} in the unmatched column. Most
 users should start with \code{\link[=build_district_panel]{build_district_panel()}} instead — it calls this
 function internally for every state and congress pair in a range.
 }
+\examples{
+matches <- naive_match(111, "pop", "CA")
+matches
+
+# add an overlap value for these district-number-based pairs
+matches$cycle     <- "cd111_cd112"
+matches$state_abb <- "CA"
+matches_with_pop <- compute_match_factor(matches, vars = "pop")
+matches_with_pop
+
+}

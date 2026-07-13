@@ -47,6 +47,16 @@
 #'   Call [compute_match_factor()] on a match_level panel if you need the
 #'   matched pairs' overlap values.
 #'
+#' @examples
+#' # cd112_cd113 spans the post-2010-census redistricting cycle
+#' hungarian_result <- hungarian_match(112, "pop", "CA")
+#' hungarian_result
+#'
+#' # compare against greedy_match() on the same inputs — greedy isn't
+#' # guaranteed to find the same (optimal) assignment
+#' greedy_result <- greedy_match(112, "pop", "CA")
+#' greedy_result
+#'
 #' @export
 hungarian_match <- function(
   source_congress, variable, state, data = overlap,

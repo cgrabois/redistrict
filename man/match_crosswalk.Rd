@@ -96,3 +96,13 @@ should start with \code{\link[=build_district_panel]{build_district_panel()}} in
 function internally across a whole range of congresses and stitches the
 results into one panel.
 }
+\examples{
+# match every state for one congress pair
+crosswalk <- match_crosswalk(111)
+crosswalk
+
+# lock incumbent-to-candidate matches first, then match the rest
+crosswalk_locked <- match_crosswalk(111, incumbent_lock = "i2c")
+crosswalk_locked
+
+}

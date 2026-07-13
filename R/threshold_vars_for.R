@@ -16,6 +16,13 @@
 #'     \item{any `afact_*` variable}{itself}
 #'   }
 #'
+#' @examples
+#' pop_vars <- threshold_vars_for("pop")
+#' pop_vars
+#'
+#' afact_vars <- threshold_vars_for("afact_s2t")
+#' afact_vars
+#'
 #' @export
 threshold_vars_for <- function(variable) {
   switch(variable,

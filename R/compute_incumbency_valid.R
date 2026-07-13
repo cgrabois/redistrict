@@ -23,6 +23,13 @@
 #'       from, in this row's cycle.}
 #'   }
 #'
+#' @examples
+#' match_level_panel <- build_district_panel(
+#'   start_congress = 111, end_congress = 114, shape = "match_level"
+#' )
+#' validated_panel <- compute_incumbency_valid(match_level_panel, "i2i")
+#' table(validated_panel$source_incumbent_valid)
+#'
 #' @export
 compute_incumbency_valid <- function(panel, incumbent_match_type) {
 

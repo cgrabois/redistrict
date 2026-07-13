@@ -32,3 +32,11 @@ each matched pair's assignment agrees with the actual incumbent (if any)
 on each side. Call this yourself on a panel you've already built — it is
 not run automatically by \code{\link[=build_district_panel]{build_district_panel()}} or \code{\link[=match_crosswalk]{match_crosswalk()}}.
 }
+\examples{
+match_level_panel <- build_district_panel(
+  start_congress = 111, end_congress = 114, shape = "match_level"
+)
+validated_panel <- compute_incumbency_valid(match_level_panel, "i2i")
+table(validated_panel$source_incumbent_valid)
+
+}
