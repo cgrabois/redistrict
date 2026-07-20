@@ -212,9 +212,15 @@ build_district_panel <- function(
     .init = cycle_crosswalks[[1]]
   )
 
-  # order columns/rows consistently regardless of shape
+  # order columns/rows consistently regardless of shape -- cd* columns are
+  # sorted by their numeric congress suffix rather than alphabetically, since
+  # e.g. "cd100" would otherwise sort before "cd92"
+  cd_cols         <- grep("^cd\\d+$", names(result), value = TRUE)
+  other_cols      <- setdiff(names(result), cd_cols)
+  cd_cols_ordered <- cd_cols[order(as.integer(sub("^cd", "", cd_cols)))]
+
   result <- result |>
-    dplyr::select(sort(names(result))) |>
+    dplyr::select(dplyr::all_of(c(sort(other_cols), cd_cols_ordered))) |>
     dplyr::arrange(state_abb)
 
   if (shape == "wide") {
@@ -253,7 +259,12 @@ build_district_panel <- function(
       cw
     }) |>
       dplyr::select(source, target, cycle, state_abb) |>
-      dplyr::arrange(cycle, source, target)
+      # sort by cycle in chronological order (names(cycle_crosswalks) is
+      # already correct), not alphabetically -- "cd100_cd101" would otherwise
+      # sort before "cd92_cd93"
+      dplyr::mutate(cycle = factor(cycle, levels = names(cycle_crosswalks))) |>
+      dplyr::arrange(cycle, source, target) |>
+      dplyr::mutate(cycle = as.character(cycle))
 
   }
 }
