@@ -10,10 +10,10 @@ Match U.S. congressional districts across redistricting cycles, based on populat
 pak::pkg_install("cgrabois/redistrict")
 ```
 
-or, with devtools:
+or, with remotes:
 
 ```r
-devtools::install_github("cgrabois/redistrict")
+remotes::install_github("cgrabois/redistrict")
 ```
 
 ## Getting started
