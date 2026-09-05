@@ -61,7 +61,7 @@ naive_match <- function(source_congress, variable, state, data = overlap) {
     ))
   }
 
-  # nothing to match if either side has no districts
+  # nothing to match if both sides are empty
   if (nrow(mat) == 0 && ncol(mat) == 0) {
     return(data.frame(
       source = character(0),
@@ -70,8 +70,14 @@ naive_match <- function(source_congress, variable, state, data = overlap) {
     ))
   }
 
+  # dimnames() is NULL for a zero-length dimension (e.g. a 1x0 matrix left
+  # after incumbent_lock removes every target column); normalise to
+  # character(0) so the length arithmetic below stays consistent. A district
+  # left with no counterpart still comes back, matched to NA.
   src_districts <- rownames(mat)
   tgt_districts <- colnames(mat)
+  if (is.null(src_districts)) src_districts <- character(0)
+  if (is.null(tgt_districts)) tgt_districts <- character(0)
 
   # pull the district number off the end of each dimname (e.g. "CA-03" -> 3)
   src_nums <- as.integer(sub(".*-", "", src_districts))
