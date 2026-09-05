@@ -25,9 +25,4 @@ Useful links:
 \author{
 \strong{Maintainer}: Charlie Grabois \email{chgrabois@gmail.com}
 
-Authors:
-\itemize{
-  \item Charlie Grabois \email{chgrabois@gmail.com}
-}
-
 }
