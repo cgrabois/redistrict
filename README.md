@@ -1,6 +1,6 @@
 # redistrict
 
-Match U.S. congressional districts across redistricting cycles, based on population/area overlap.
+Match U.S. congressional districts across redistricting cycles based on population/area overlap.
 
 `redistrict` provides three matching algorithms (Hungarian, greedy, naive) for tracking which districts in one congress correspond to which districts in the next, plus helpers for building multi-cycle panels and validating matches against actual incumbent behavior.
 
