@@ -43,6 +43,7 @@ panel <- build_district_panel(
 
 - **`compute_incumbency_valid()`** — checks matched pairs against actual incumbent behavior (did the algorithm send a district to where its real incumbent went?).
 - **`compute_match_factor()`** — adds overlap/allocation values (for any variable) to a `match_level` panel.
+- **`compute_comparison_count()`** — counts number of within-lineage comparisons across time which could contribute to a difference-in-differences estimate. 
 
 ## Bundled data
 
